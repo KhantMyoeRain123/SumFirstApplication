@@ -9,6 +9,8 @@ import json
 games = {}
 player_to_hex = {}
 
+# copied from discord bot project not final and will have to adjust
+
 
 class Game:
     def __init__(self, code):

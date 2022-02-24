@@ -2,12 +2,18 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <link rel="stylesheet" href="styles.css"> 
     <title>Sum First!</title>
   </head>
   <body>
+    <header><h1 id="code-text"></h1></header>
     Game Room Host!
+    
+    <button type="button" id="start-button">Start</button> 
+    <input type="text" id="answer-field"><br><br>
+    <button type="button" id="submit-button">Submit</button> 
+    <script src="gameRoomHostRenderer.js"></script>
+   
+   
   </body>
 </html>

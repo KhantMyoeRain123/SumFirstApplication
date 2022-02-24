@@ -5,6 +5,23 @@ const { app, BrowserWindow,ipcMain} = require('electron')
 const WebSocket = require('ws');
 const crypto=require('crypto')
 const ws=new WebSocket("ws://localhost:8001/")
+roomCode=''
+
+
+const receiveFromServer=()=>{
+  ws.addEventListener('message',({data})=>{
+    const event=JSON.parse(data)
+    if (event.type==='error'){
+      BrowserWindow.getFocusedWindow().loadFile('roomnotfound.html')
+      console.log(event.msg)
+    }
+
+
+  })
+}
+receiveFromServer()
+
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -25,12 +42,7 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools()
 }
 
-const receiveFromServer=()=>{
-  ws.addEventListener('message',({data})=>{
-    const event=JSON.parse(data)
 
-  })
-}
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -54,7 +66,7 @@ app.on('window-all-closed', () => {
   }
 })
 
-
+//join a game
 ipcMain.on('to-game-room-page-join',(e,code)=>{
   
   const event={type:'join-room',code:code,playerName:'James'}
@@ -62,17 +74,21 @@ ipcMain.on('to-game-room-page-join',(e,code)=>{
   {
     //wait if the connection is not yet established
   }
+
   ws.send(JSON.stringify(event))
+  console.log('Join')
+  roomCode=code
   BrowserWindow.getFocusedWindow().loadFile('gameroom.html')
-  receiveFromServer()
+
 
 })
 
 
-
+//make a game
 ipcMain.on('to-game-room-page-make',()=>{
   
   randomString=crypto.randomBytes(3).toString('hex')
+  roomCode=randomString
   const event={type:'make-room',code:randomString,playerName:'James'}
   while (ws.readyState==0)
   {
@@ -80,8 +96,23 @@ ipcMain.on('to-game-room-page-make',()=>{
   }
   ws.send(JSON.stringify(event))
   BrowserWindow.getFocusedWindow().loadFile('gameroomhost.html')
-  receiveFromServer()
 
+  BrowserWindow.getFocusedWindow().webContents.on('did-finish-load',()=>{
+    BrowserWindow.getFocusedWindow().webContents.send('room-code-display',randomString)
+  })
+  
+})
+
+//return from room not found page to home page
+ipcMain.on('to-home-page',()=>{
+  BrowserWindow.getFocusedWindow().loadFile('homepage.html')
+
+})
+
+//start a game
+ipcMain.on('game-started',()=>{
+const event={type:'start',code:roomCode,playerName:'James'}
+ws.send(JSON.stringify(event))
 })
 
 

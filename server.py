@@ -1,4 +1,5 @@
 import asyncio
+from distutils.log import error
 
 import websockets
 
@@ -7,7 +8,7 @@ import random
 import json
 
 games = {}
-player_to_hex = {}
+player_to_hexws = {}
 
 # copied from discord bot project not final and will have to adjust
 
@@ -21,6 +22,8 @@ class Game:
         self.answered = {}
         self.question_asked = False
         self.resolving = False
+        self.ws = []
+        self.started = False
 
     def generate_question(self):
         num_of_num = random.randint(3, 10)
@@ -49,25 +52,64 @@ class Game:
         self.answered.clear()
         self.question_asked = False
 
+# handle room joining and making
+
 
 async def handler(websocket):
     async for message in websocket:
         event = json.loads(message)
         if event['type'] == 'join-room':
-            print(event['code'])
+            if(event['code'] in games):
+                games[event['code']].players[event['playerName']] = [
+                    0, event['code']]
+                player_to_hexws[event['playerName']] = [
+                    event['code'], websocket]
+                games[event['code']].ws.append(websocket)
+                # DEBUG PRINTS
+                print(f'Player has joined room with code{event["code"]}')
+                print(games)
+                print(player_to_hexws)
+                print(games[event['code']].ws)
+                await play(websocket, event['code'])
+            else:
+                print('ERROR')
+                reply = {'type': 'error', 'msg': 'Room does not exist.'}
+                await websocket.send(json.dumps(reply))
+
         if event['type'] == 'make-room':
             game = Game(event['code'])
             game.players[event['playerName']] = [0, event['code']]
+            game.ws.append(websocket)
             games[event['code']] = game
-            player_to_hex[event['playerName']] = event['code']
-            print(f'A room with code '+event['code']+' has been made.')
+            player_to_hexws[event['playerName']] = [event['code'], websocket]
+            # DEBUG PRINTS
+            print(f'A room with code {event["code"]} has been made.')
             print(games)
-            print(player_to_hex)
+            print(player_to_hexws)
+            print(game.ws)
+
+            await start(websocket, event['code'])
+
+
+# start the game after entering the room
+async def start(websocket, code):
+    message = await websocket.recv()
+    event = json.loads(message)
+    if event['type'] == 'start':
+        games[code].started = True
+        await play(websocket, code)
+
+
+# game loop
+async def play(websocket, code):
+    while True:
+        if(games[code].started):
+            pass
 
 
 async def main():
     async with websockets.serve(handler, "", 8001):
-        await asyncio.Future()  # run forever
+        await asyncio.Future()  # run forever}
 
 
 if __name__ == "__main__":

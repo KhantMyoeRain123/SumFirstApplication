@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="styles.css"> 
     <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <title>Sum First!</title>
   </head>
   <body>
-    <button type="button" id="make-game-button">Make Game</button> 
-    <label>Room Code</label>
-    <input type="text" id="room-code-field"><br><br>
-    <button type="button" id="join-button">Join</button> 
-    <script src="routeToGame.js"></script>
+    <header><h1>+SUM FIRST+</h1></header>
+    <div class="interact-box">
+      <button type="button" id="make-game-button">MAKE GAME</button><br><br> 
+      <label>ROOM CODE</label>
+      <span><input type="text" class="text-field" id="room-code-field"></span>
+       <span><button type="button" id="join-button">JOIN</button>
+       </span> 
+     </div>
+    
+    <script src="homePageRenderer.js"></script>
   </body>
 </html>
